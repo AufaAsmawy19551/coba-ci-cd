@@ -1,160 +1,142 @@
-const supertest = require('supertest');
-const app = require('../app');
+const request = require('supertest');
+const app = require('../app.js');
 const truncate = require('../utils/truncate');
 
 // reset database user
 truncate.user();
 
 const user = {
-    name: 'sabrina',
-    email: 'sabrina3@mail.com',
-    password: 'password123',
-    token: ''
+	name: 'sabrina',
+	email: 'sabrina3@mail.com',
+	password: 'password123',
+	token: '',
 };
 
 // register
-describe('TEST /auth/register endpoint', () => {
-    // positive
-    test('Register berhasil : email belum terdaftar', async () => {
-        try {
+describe('/register [POST]', () => {
+	test('Register success', async () => {
+		try {
+			const res = await request(app).post('/register').send(user);
 
-            const res = await supertest(app)
-                .post('/auth/register')
-                .send(user);
+			expect(res.statusCode).toBe(200);
+			expect(res.body).toHaveProperty('status');
+			expect(res.body).toHaveProperty('message');
+			expect(res.body).toHaveProperty('data');
+			expect(res.body.data).toHaveProperty('id');
+			expect(res.body.data).toHaveProperty('name');
+			expect(res.body.data).toHaveProperty('email');
+			expect(res.body.status).toBe(true);
+			expect(res.body.message).toBe('user registered!');
+		} catch (error) {
+			expect(error).toBe('error'); // test gagal karena err != 'error'
+		}
+	});
 
-            console.log(res.body);
+	test('Register: email already used!', async () => {
+		try {
+			const res = await request(app).post('/register').send(user);
 
-            expect(res.statusCode).toBe(201);
-            expect(res.body).toHaveProperty('status');
-            expect(res.body).toHaveProperty('message');
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.data).toHaveProperty('id');
-            expect(res.body.data).toHaveProperty('name');
-            expect(res.body.data).toHaveProperty('email');
-            expect(res.body.status).toBe(true);
-            expect(res.body.message).toBe('user created!');
-
-        } catch (error) {
-            expect(error).toBe('error');
-        }
-    });
-
-    // negative
-    test('Register gagal : email sudah terdaftar', async () => {
-        try {
-
-            const res = await supertest(app)
-                .post('/auth/register')
-                .send(user);
-
-            console.log(res.body);
-
-            expect(res.statusCode).toBe(400);
-            expect(res.body).toHaveProperty('status');
-            expect(res.body).toHaveProperty('message');
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.status).toBe(false);
-            expect(res.body.message).toBe('email already used!');
-
-        } catch (error) {
-            expect(error).toBe('error');
-        }
-    });
+			expect(res.statusCode).toBe(400);
+			expect(res.body).toHaveProperty('status');
+			expect(res.body).toHaveProperty('message');
+			expect(res.body).toHaveProperty('data');
+			expect(res.body.status).toBe(false);
+			expect(res.body.message).toBe('email already used!');
+			expect(res.body.data).toBe(null);
+		} catch (error) {
+			expect(error).toBe('error'); // test gagal karena err != 'error'
+		}
+	});
 });
 
+// login
+describe('/login [POST]', () => {
+	// positive case
+	test('Login dengan email dan password yang benar.', async () => {
+		try {
+			// hit endpoint
+			const res = await request(app).post('/login').send(user);
 
-// login 
-describe('TEST /auth/login endpoint', () => {
-    test('Login berhasil : email dan password valid', async () => {
-        try {
+			// expect
+			expect(res.statusCode).toBe(200);
+			expect(res.body).toHaveProperty('status');
+			expect(res.body).toHaveProperty('message');
+			expect(res.body).toHaveProperty('data');
+			expect(res.body.data).toHaveProperty('token');
+			expect(res.body.status).toBe(true);
+			expect(res.body.message).toBe('login success!');
 
-            const res = await supertest(app)
-                .post('/auth/login')
-                .send(user);
+			user.token = res.body.data.token;
+		} catch (error) {
+			expect(error).toBe('error');
+		}
+	});
 
-            console.log(res.body);
+	// negative case
+	test('Login dengan email dan password yang salah.', async () => {
+		try {
+			// body data
+			const email = 'hacker@gmail.com'; // email tidak terdaftar
+			const password = '1234';
 
-            expect(res.statusCode).toBe(200);
-            expect(res.body).toHaveProperty('status');
-            expect(res.body).toHaveProperty('message');
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.data).toHaveProperty('token');
-            expect(res.body.status).toBe(true);
-            expect(res.body.message).toBe('login success!');
+			// hit endpoint
+			const res = await request(app).post('/login').send({
+				email,
+				password,
+			});
 
-            user.token = res.body.token;
-        } catch (error) {
-            expect(error).toBe('error');
-        }
-    });
-
-    test('Login gagal : email dan password tidak valid', async () => {
-        try {
-
-            const res = await supertest(app)
-                .post('/auth/login')
-                .send({
-                    email: user.email,
-                    password: `${user.password}45`
-                });
-
-            console.log(res.body);
-
-            expect(res.statusCode).toBe(400);
-            expect(res.body).toHaveProperty('status');
-            expect(res.body).toHaveProperty('message');
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.status).toBe(false);
-            expect(res.body.message).toBe('credential is not valid!');
-
-        } catch (error) {
-            expect(error).toBe('error');
-        }
-    });
+			// expect
+			expect(res.statusCode).toBe(400);
+			expect(res.body).toHaveProperty('status');
+			expect(res.body).toHaveProperty('message');
+			expect(res.body).toHaveProperty('data');
+			expect(res.body.status).toBe(false);
+			expect(res.body.message).toBe('credential is not valid!');
+		} catch (error) {
+			expect(error).toBe('error');
+		}
+	});
 });
 
 // whoami
-describe('TEST /auth/whoami endpoint', () => {
-    test('Fetch user berhasil : token di provide', async () => {
-        try {
+describe('/whoami [GET]', () => {
+	// positive case
+	test('Akses dengan mengirimkan token didalam header.', async () => {
+		console.log(`INI TOKEN ${user.token}`);
+		try {
+			// hit endpoint
+			const res = await request(app).get('/whoami').set('token', user.token);
 
-            const res = await supertest(app)
-                .get('/auth/whoami')
-                .set('Authorization', user.token);
+			// expect
+			expect(res.statusCode).toBe(200);
+			expect(res.body).toHaveProperty('status');
+			expect(res.body).toHaveProperty('message');
+			expect(res.body).toHaveProperty('data');
+			expect(res.body.data).toHaveProperty('id');
+			expect(res.body.data).toHaveProperty('name');
+			expect(res.body.data).toHaveProperty('email');
+			expect(res.body.status).toBe(true);
+			expect(res.body.message).toBe('success!');
+		} catch (error) {
+			expect(error).toBe('error');
+		}
+	});
 
+	// negative case
+	test('Akses dengan tidak mengirimkan token didalam header.', async () => {
+		try {
+			// hit endpoint
+			const res = await request(app).get('/whoami');
 
-            console.log(res.body);
-
-            expect(res.statusCode).toBe(200);
-            expect(res.body).toHaveProperty('status');
-            expect(res.body).toHaveProperty('message');
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.data).toHaveProperty('token');
-            expect(res.body.status).toBe(true);
-            expect(res.body.message).toBe('login success!');
-
-        } catch (error) {
-            expect(error).toBe('error');
-        }
-    });
-
-    test('Fetch user gagal : token tidak di provide', async () => {
-        try {
-
-            const res = await supertest(app)
-                .get('/auth/whoami');
-
-            console.log(res.body);
-
-            expect(res.statusCode).toBe(401);
-            expect(res.body).toHaveProperty('status');
-            expect(res.body).toHaveProperty('message');
-            expect(res.body).toHaveProperty('data');
-            expect(res.body.status).toBe(false);
-            expect(res.body.message).toBe('you\'re not authorized!');
-
-        } catch (error) {
-            expect(error).toBe('error');
-        }
-    });
+			// expect
+			expect(res.statusCode).toBe(401);
+			expect(res.body).toHaveProperty('status');
+			expect(res.body).toHaveProperty('message');
+			expect(res.body).toHaveProperty('data');
+			expect(res.body.status).toBe(false);
+			expect(res.body.message).toBe("you're not authorized!");
+		} catch (error) {
+			expect(error).toBe('error');
+		}
+	});
 });

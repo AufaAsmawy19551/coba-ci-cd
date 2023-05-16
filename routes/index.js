@@ -12,8 +12,8 @@ router.get('/home', async (req, res, next) => {
 	});
 });
 
-router.post('/auth/register', user.register);
-router.post('/auth/login', user.login);
-router.get('/auth/whoami', middlewares.auth, user.whoami);
+router.post('/register', user.register);
+router.post('/login', user.login);
+router.get('/whoami', middlewares.auth, user.whoami);
 
 module.exports = router;
