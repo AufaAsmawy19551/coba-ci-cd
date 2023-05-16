@@ -7,7 +7,7 @@ const middlewares = require('../utils/middlewares');
 router.get('/home', async (req, res, next) => {
   return res.status(200).json({
 		status: true,
-		message: 'welcome to coba Ci CD API',
+		message: 'welcome to coba CI-CD API',
 		data: null,
 	});
 });
