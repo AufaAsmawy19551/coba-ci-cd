@@ -23,11 +23,8 @@ jobs:
       - name: Install Railway
         run: npm i -g @railway/cli
 
-      - name: Login Railway
-        run: railway login
-
       - name: Migrate database
-        run: railway run sequelize-cli db:migrate
+        run: npx sequelize-cli db:migrate
 
       - name: Deploy
         run: railway up
