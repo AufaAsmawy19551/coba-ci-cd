@@ -29,7 +29,7 @@ jobs:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_DEV_TOKEN }}
       
       - name: Migrate database
-        run: railway run sequelize-cli db:migrate
+        run: npx sequelize-cli db:migrate
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_DEV_TOKEN }}
 # RAILWAY_DEV_TOKEN: b291d159-afe3-4b4f-af59-8c71523a1a4d
