@@ -23,11 +23,11 @@ jobs:
       - name: Install Railway
         run: npm i -g @railway/cli
 
-      - name: Migrate database
-        run: npx sequelize-cli db:migrate
-
       - name: Deploy
         run: railway up
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_DEV_TOKEN }}
+      
+      - name: Migrate database
+        run: npx sequelize-cli db:migrate
 # RAILWAY_DEV_TOKEN: b291d159-afe3-4b4f-af59-8c71523a1a4d
