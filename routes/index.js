@@ -16,4 +16,12 @@ router.post('/register', user.register);
 router.post('/login', user.login);
 router.get('/whoami', middlewares.auth, user.whoami);
 
+router.get('/error', async (req, res, next) => {
+	return res.status(200).json({
+		status: true,
+		message: 'welcome to coba CI-CD API',
+		data: null,
+	});
+});
+
 module.exports = router;
