@@ -27,4 +27,3 @@ jobs:
         run: railway up
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_PROD_TOKEN }}
-# RAILWAY_PROD_TOKEN: 2420f45b-cae9-4f35-8061-a6fd7ba13696
