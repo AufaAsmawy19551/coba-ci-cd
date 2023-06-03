@@ -35,6 +35,7 @@ app.use(Sentry.Handlers.tracingHandler());
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.use('images', express.static('./public/images'));
 
 app.use(router);
 

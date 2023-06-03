@@ -4,8 +4,8 @@ const { JWT_SECRET_KEY } = process.env;
 module.exports = {
 	auth: async (req, res, next) => {
 		try {
-			const { token } = req.headers;
-			if (!token) {
+			const { authorization } = req.headers;
+			if (!authorization) {
 				return res.status(401).json({
 					status: false,
 					message: `you're not authorized!`,
@@ -13,7 +13,7 @@ module.exports = {
 				});
 			}
 
-			const data = await jwt.verify(token, JWT_SECRET_KEY);
+			const data = await jwt.verify(authorization, JWT_SECRET_KEY);
 			console.log(`INI DATA ${data.id}`);
 			req.user = {
 				id: data.id,
